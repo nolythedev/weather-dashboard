@@ -73,3 +73,12 @@ header {
 #section6 {
     grid-area: section6;
 }
+
+#history button {
+    background-color: #b4d4f2;
+    width: 100%;
+    border: none;
+    border-radius: 200px;
+    padding: 10px 20px;
+    margin: 10px;
+}
