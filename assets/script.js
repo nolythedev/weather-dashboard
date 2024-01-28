@@ -1,6 +1,8 @@
-
 $(document).ready(function () {
 
+    getDate();
+
+    // Define an object containing different weather conditions with their descriptions and image URLs
     const weatherConditions = {
         clear: {
             description: "Clear",
@@ -40,30 +42,26 @@ $(document).ready(function () {
         }
     };
 
-    console.log(weatherConditions.clear.image);
-    getDate();
+    // Define the current time
     var currentTime = dayjs();
 
-    function getDate() {
+    // Define userClick variable
+    let userClick;
 
+    // Define an array to store unique locations
+    const uniqueLocations = [];
+
+    // Function to get current date and time every second
+    function getDate() {
         setInterval(function () {
             $('#date-time').text(currentTime.format('dddd D, MMMM HH:mm'))
         }, 1000)
-
     }
 
     function displayWeather(event) {
-
         event.preventDefault();
-
         // Grab the user input 
         const userInput = $('#search-input').val().trim();
-
-       $("#historyLocation").on("click", function (event) {
-            const userClick = $(event.target.value);
-            console.log(userClick);
-
-        });
 
         // Grab the API and assign user input 
         let queryURL = 'https://api.openweathermap.org/data/2.5/weather?q=' + (userInput || userClick) + '&appid=301a6841ff749117c25d4794699b9037&units=metric';
@@ -78,17 +76,25 @@ $(document).ready(function () {
 
                 $('#locationName').text(data.name);
 
-                $('#history').append(`<button value="${data.name}"> ${data.name}, ${data.sys.country}</button>`);
+                // Add the location to uniqueLocations array if it's not already there
+                if (!uniqueLocations.includes(data.name)) {
+                    uniqueLocations.push(data.name);
+                    $('#history').append(`<button data-location="${data.name}" class='historyLocation'> ${data.name}, ${data.sys.country}</button>`);
+                }
 
+                // Update the text of the element with id 'locationConditions' to display the current weather conditions
+                // Convert the first letter of the weather description to uppercase using CSS
                 $('#locationConditions').text(`Current Conditions: ${data.weather[0].description} `).attr('style', 'text-transform: capitalize;');
 
+                // Update the text of the element with id 'locationTemp' to display the current temperature
                 $('#locationTemp').text(`Temperature: ${data.main.temp} °C `);
 
+                // Update the text of the element with id 'locationWind' to display the current wind speed
                 $('#locationWind').text(`Wind: ${data.wind.speed} m/s `);
 
+                // Update the text of the element with id 'locationHumidity' to display the current humidity
                 $('#locationHumidity').text(`Humidity: ${data.main.humidity} % `);
 
-         
 
                 // Clear the image first
                 $('#weatherImage').attr('src', '').attr('style', 'max-width: 150px');
@@ -110,10 +116,22 @@ $(document).ready(function () {
             });
     }
 
+    // Function to handle the click event on a history location button
+    function getHistoryLocation(event) {
+        // Get the location from the clicked button's data-location attribute
+        userClick = $(event.target).attr('data-location');
+        // Now that userClick is updated, call displayWeather function to fetch weather for the clicked location
+        displayWeather(event);
+    }
 
+    // Call the getDate function to start updating the date and time display
+    getDate();
 
-
+    // Attach a click event listener to the search button to trigger the displayWeather function
     $("#search-button").on('click', displayWeather);
 
+    // Attach a click event listener to dynamically created history location buttons using event delegation
+    // When a history location button is clicked, call the getHistoryLocation function
+    $(document).on('click', '.historyLocation', getHistoryLocation);
 
 });
