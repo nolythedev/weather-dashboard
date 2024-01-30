@@ -48,8 +48,14 @@ $(document).ready(function () {
     // Define userClick variable
     let userClick;
 
-    // Define an array to store unique locations
-    const uniqueLocations = [];
+    // Retrieve locations from localStorage
+    let uniqueLocations = localStorage.getItem("Locations");
+    uniqueLocations = uniqueLocations ? uniqueLocations.split(',') : [];
+
+    // Display history buttons for existing locations
+    uniqueLocations.forEach(location => {
+        $('#history').append(`<button data-location="${location}" class='historyLocation'> ${location}</button>`);
+    });
 
     // Function to get current date and time every second
     function getDate() {
@@ -58,27 +64,23 @@ $(document).ready(function () {
         }, 1000)
     }
 
-    function displayWeather(event) {
-        event.preventDefault();
-        // Grab the user input 
-        const userInput = $('#search-input').val().trim();
+    function displayWeather(cityName) {
+        let queryURL = 'https://api.openweathermap.org/data/2.5/weather?q=' + cityName + '&appid=301a6841ff749117c25d4794699b9037&units=metric';
 
-        // Grab the API and assign user input 
-        let queryURL = 'https://api.openweathermap.org/data/2.5/weather?q=' + (userInput || userClick) + '&appid=301a6841ff749117c25d4794699b9037&units=metric';
-
-        $('#search-input').val('');
         fetch(queryURL)
             .then(function (response) {
                 return response.json();
-            }).then(function (data) {
+            })
+            .then(function (data) {
                 console.log(data);
-                console.log(queryURL);
 
                 $('#locationName').text(data.name);
 
                 // Add the location to uniqueLocations array if it's not already there
                 if (!uniqueLocations.includes(data.name)) {
                     uniqueLocations.push(data.name);
+                    // Update localStorage with the updated uniqueLocations array as a string
+                    localStorage.setItem("Locations", uniqueLocations.join(','));
                     $('#history').append(`<button data-location="${data.name}" class='historyLocation'> ${data.name}, ${data.sys.country}</button>`);
                 }
 
@@ -113,7 +115,17 @@ $(document).ready(function () {
                     }
                 }
 
+                // Update last searched city in local storage
+                localStorage.setItem("LastSearchedCity", data.name);
+
+            })
+            .catch(function (error) {
+                console.error('Error fetching weather data:', error);
             });
+    }
+
+    function displayForecast(params) {
+        let queryURL = "https://api.openweathermap.org/data/2.5/weather?lat=57&lon=-2.15&appid={API key}&units=metric"
     }
 
     // Function to handle the click event on a history location button
@@ -121,14 +133,28 @@ $(document).ready(function () {
         // Get the location from the clicked button's data-location attribute
         userClick = $(event.target).attr('data-location');
         // Now that userClick is updated, call displayWeather function to fetch weather for the clicked location
-        displayWeather(event);
+        displayWeather(userClick);
+    }
+
+    localStorage.setItem("Locations", uniqueLocations);
+
+    // Retrieve last searched city from local storage
+    const lastSearchedCity = localStorage.getItem("LastSearchedCity");
+
+    // If last searched city exists, display its weather information
+    if (lastSearchedCity) {
+        displayWeather(lastSearchedCity);
     }
 
     // Call the getDate function to start updating the date and time display
     getDate();
 
     // Attach a click event listener to the search button to trigger the displayWeather function
-    $("#search-button").on('click', displayWeather);
+    $("#search-button").on('click', function (event) {
+        event.preventDefault();
+        displayWeather($('#search-input').val().trim());
+        $('#search-input').val('');
+    });
 
     // Attach a click event listener to dynamically created history location buttons using event delegation
     // When a history location button is clicked, call the getHistoryLocation function
