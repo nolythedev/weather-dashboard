@@ -84,6 +84,7 @@ $(document).ready(function () {
                     $('#history').append(`<button data-location="${data.name}" class='historyLocation'> ${data.name}, ${data.sys.country}</button>`);
                 }
 
+
                 // Update the text of the element with id 'locationConditions' to display the current weather conditions
                 // Convert the first letter of the weather description to uppercase using CSS
                 $('#locationConditions').text(`Current Conditions: ${data.weather[0].description} `).attr('style', 'text-transform: capitalize;');
@@ -159,5 +160,17 @@ $(document).ready(function () {
     // Attach a click event listener to dynamically created history location buttons using event delegation
     // When a history location button is clicked, call the getHistoryLocation function
     $(document).on('click', '.historyLocation', getHistoryLocation);
+
+    function clearHistory() {
+        localStorage.removeItem("Locations");
+        $('#history').empty();
+    }
+
+    // Check if uniqueLocations exceed limit, if yes, show clear history button
+    if (uniqueLocations.length > 8) {
+        $('#history').append(`<button class='clearHistory'> Clear History</button>`);
+        // Bind click event to clear history button
+        $(document).on('click', '.clearHistory', clearHistory);
+    }
 
 });

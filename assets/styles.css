@@ -71,6 +71,12 @@ h3 {
     padding: 30px;
 }
 
+button.clearHistory {
+    margin-top: 10px !important;
+    color: rgb(17, 17, 17);
+    background-color: rgb(255, 166, 0) !important;
+}
+
 #section1 {
     grid-area: section1;
 }
