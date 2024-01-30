@@ -52,6 +52,9 @@ $(document).ready(function () {
     let uniqueLocations = localStorage.getItem("Locations");
     uniqueLocations = uniqueLocations ? uniqueLocations.split(',') : [];
 
+    // Clear the history element before adding buttons for existing locations
+$('#history').empty();
+
     // Display history buttons for existing locations
     uniqueLocations.forEach(location => {
         $('#history').append(`<button data-location="${location}" class='historyLocation'> ${location}</button>`);
@@ -160,17 +163,5 @@ $(document).ready(function () {
     // Attach a click event listener to dynamically created history location buttons using event delegation
     // When a history location button is clicked, call the getHistoryLocation function
     $(document).on('click', '.historyLocation', getHistoryLocation);
-
-    function clearHistory() {
-        localStorage.removeItem("Locations");
-        $('#history').empty();
-    }
-
-    // Check if uniqueLocations exceed limit, if yes, show clear history button
-    if (uniqueLocations.length > 8) {
-        $('#history').append(`<button class='clearHistory'> Clear History</button>`);
-        // Bind click event to clear history button
-        $(document).on('click', '.clearHistory', clearHistory);
-    }
 
 });
